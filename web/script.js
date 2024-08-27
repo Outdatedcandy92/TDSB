@@ -31,9 +31,11 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
                 console.log(data);
+                console.log(data.text);
             })
             .catch(error => {
                 console.error(error);
+                console.log(error.text);
             });
     });
 });

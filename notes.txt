@@ -1,0 +1,24 @@
+Features I want-
+
+- custom profile picture
+- encrypted storage
+- token automatically rewned before expiry
+- Caching of timetable/stuff for offline work
+
+
+PAGES
+
+Login Page
+    -Log in
+
+1. HOME PAGE
+    -shows todays timetable, announcement
+
+2. TimeTable Page
+    -shows weekly timetable
+
+3. announcement
+    - Shows Announcements
+
+4. Calender Page
+    -shows calender and events    

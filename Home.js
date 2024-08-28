@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
   const [storedItem, setStoredItem] = useState(null);
+  const [studentInfo, setStudentInfo] = useState(null);
 
   useEffect(() => {
     const fetchStoredItem = async () => {
@@ -12,7 +13,6 @@ const Home = () => {
         if (token !== null) {
           console.log('Stored item:', token);
           setStoredItem(token);
-
 
           const url = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo';
           const response = await fetch(url, {
@@ -29,9 +29,10 @@ const Home = () => {
 
           const data = await response.json();
           console.log('Response data:', data);
-          const student_info = data['SchoolCodeList'][0]['StudentInfo'];
+          const studentInfo = data['SchoolCodeList'][0]['StudentInfo'];
+          setStudentInfo(studentInfo);
 
-          console.log('Student Info:', student_info);
+          console.log('Student Info:', studentInfo);
         } else {
           console.log('No item found in storage.');
         }
@@ -47,6 +48,7 @@ const Home = () => {
     try {
       await AsyncStorage.removeItem('access_token');
       setStoredItem(null);
+      setStudentInfo(null);
       console.log('Logged out successfully');
     } catch (error) {
       console.error('Failed to log out:', error);
@@ -56,22 +58,19 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <Text>Welcome to the Home Screen!</Text>
-      {student_info ? (
+      {studentInfo ? (
         <>
-          <Text>Name: {student_info.FirstName} {student_info.LastName}</Text>
-          <Text>Age: {student_info.Age}</Text>
-          <Text>Gender: {student_info.Gender}</Text>
-          <Text>Grade: {student_info.CurrentGradeLevel}</Text>
+          <Text>Name: {studentInfo.FirstName} {studentInfo.LastName}</Text>
+          <Text>Age: {studentInfo.Age}</Text>
+          <Text>Gender: {studentInfo.Gender}</Text>
+          <Text>Grade: {studentInfo.CurrentGradeLevel}</Text>
         </>
       ) : (
         <Text>Loading student information...</Text>
       )}
 
-
       <Button title="Logout" onPress={handleLogout} />
     </View>
-
-
   );
 };
 
@@ -80,6 +79,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    fontFamily: 'PhantomSans-Bold',
   },
 });
 

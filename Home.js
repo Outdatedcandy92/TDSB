@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
@@ -13,8 +13,8 @@ const Home = () => {
           console.log('Stored item:', token);
           setStoredItem(token);
 
-          
-          const url = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo'; 
+
+          const url = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo';
           const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -29,7 +29,7 @@ const Home = () => {
 
           const data = await response.json();
           console.log('Response data:', data);
-          student_info = data['SchoolCodeList'][0]['StudentInfo'];
+          const student_info = data['SchoolCodeList'][0]['StudentInfo'];
 
           console.log('Student Info:', student_info);
         } else {
@@ -43,14 +43,35 @@ const Home = () => {
     fetchStoredItem();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('access_token');
+      setStoredItem(null);
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text>Welcome to the Home Screen!</Text>
-      {student_info && <Text>Name: {student_info['FirstName']} {student_info['LastName']}</Text>}
-      {student_info && <Text>Age: {student_info['Age']}</Text>}
-      {student_info && <Text>Gender: {student_info['Gender']}</Text>}
-      {student_info && <Text>Grade: {student_info['CurrentGradeLevel']}</Text>}
+      {student_info ? (
+        <>
+          <Text>Name: {student_info.FirstName} {student_info.LastName}</Text>
+          <Text>Age: {student_info.Age}</Text>
+          <Text>Gender: {student_info.Gender}</Text>
+          <Text>Grade: {student_info.CurrentGradeLevel}</Text>
+        </>
+      ) : (
+        <Text>Loading student information...</Text>
+      )}
+
+
+      <Button title="Logout" onPress={handleLogout} />
     </View>
+
+
   );
 };
 

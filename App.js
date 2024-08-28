@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Switch } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Home from './Home'; 
+import { Ionicons } from '@expo/vector-icons'; 
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isSwitchOn, setIsSwitchOn] = useState(false);
+  const [isRememberMe, setIsRememberMe] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -25,7 +27,12 @@ export default function App() {
   }, []);
 
   const handleLogin = async () => {
-    console.log({ username, password, isSwitchOn });
+    if (!username || !password) {
+      Alert.alert('Error', 'Please fill in both username and password.');
+      return;
+    }
+
+    console.log({ username, password, isRememberMe });
 
     const url = 'https://zappsmaprd.tdsb.on.ca/token'; 
 
@@ -60,6 +67,7 @@ export default function App() {
       setIsLoggedIn(true);
     } catch (error) {
       console.error('Login failed', error);
+      Alert.alert('Login Failed', 'Invalid username or password. Please try again.');
     }
   };
 
@@ -85,18 +93,25 @@ export default function App() {
                     />
                   </View>
                   <View style={styles.formGroup}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Password"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry
-                    />
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        style={styles.passwordInput}
+                        placeholder="Password"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!isPasswordVisible}
+                      />
+                      <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeIconContainer}>
+                        <Ionicons name={isPasswordVisible ? "eye-off" : "eye"} size={24} color="gray" style={styles.eyeIcon} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <Switch
-                    value={isSwitchOn}
-                    onValueChange={setIsSwitchOn}
-                  />
+                  <View style={styles.rememberMeContainer}>
+                    <TouchableOpacity onPress={() => setIsRememberMe(!isRememberMe)} style={styles.radioButton}>
+                      {isRememberMe && <View style={styles.radioButtonSelected} />}
+                    </TouchableOpacity>
+                    <Text style={styles.rememberMeText}>Remember Me</Text>
+                  </View>
                   <Button title="Login" onPress={handleLogin} />
                 </View>
               </View>
@@ -137,5 +152,47 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     paddingHorizontal: 8,
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingRight: 40,
+  },
+  eyeIconContainer: {
+    position: 'absolute',
+    right: 10,
+    top: 8,
+  },
+  eyeIcon: {
+    height: 24,
+    width: 24,
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  rememberMeText: {
+    marginLeft: 8,
+  },
+  radioButton: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioButtonSelected: {
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    backgroundColor: 'gray',
   },
 });

@@ -1,40 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Home from './Home';
-import SignIn from './SignIn';
+import { useFonts } from 'expo-font';
+import SignIn from './SignIn'; 
+import Home from './Home'; 
 
 const Stack = createStackNavigator();
 
-export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+function App() {
+  const [fontsLoaded] = useFonts({
+    'PhantomSans-Bold': require('./assets/fonts/PhantomSans-Bold.ttf'),
+    'PhantomSans-Regular': require('./assets/fonts/PhantomSans-Regular.ttf'),
+    'PhantomSans-Book': require('./assets/fonts/PhantomSans0.5-Book.ttf'),
+    'PhantomSans-Medium': require('./assets/fonts/PhantomSans0.5-Medium.ttf'),
+    'PhantomSans-Semibold': require('./assets/fonts/PhantomSans0.5-Semibold.ttf'),
+  });
 
-  useEffect(() => {
-    const checkAccessToken = async () => {
-      const token = await AsyncStorage.getItem('access_token');
-      if (token) {
-        setIsLoggedIn(true);
-      }
-      setIsLoading(false);
-    };
-    checkAccessToken();
-  }, []);
-
-  if (isLoading) {
-    return null; // loading spinner later
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {isLoggedIn ? (
-          <Stack.Screen name="Home" component={Home} />
-        ) : (
-          <Stack.Screen name="SignIn" component={SignIn} />
-        )}
+        <Stack.Screen
+          name="SignIn"
+          component={SignIn}
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default App;

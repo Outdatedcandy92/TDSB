@@ -34,3 +34,5 @@ yarn-error.*
 *.tsbuildinfo
 
 
+test.py
+test.json

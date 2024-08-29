@@ -1,9 +1,12 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
+  const [classes, setClasses] = useState([]);
+  const [cycleDay, setCycleDay] = useState(null);
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('access_token');
@@ -15,19 +18,94 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+      const date = "06092024";
+      const response = await fetch(`https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/${date}`, { //get school code from student info
+        method: 'GET',
+        headers: {
+          "X-Client-App-Info": "Android||2024Oct01120000P|False|.2.6|False|306|",
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log("fetch successful");
+      // get the day (day 1 or day 2)
+      if (data.CourseTable.length > 0) {
+        const cycleDayValue = data.CourseTable[0].StudentCourse.CycleDay;
+        console.log('CycleDay:', cycleDayValue);
+        setCycleDay(cycleDayValue);
+      }
+
+      const timeRanges = [
+        "9:00-10:20",
+        "10:25-11:40",
+        "12:40-1:55",
+        "2:00-3:15"
+      ];
+
+      const fetchedClasses = data.CourseTable.map((course, index) => ({
+        ...course.StudentCourse,
+        time: timeRanges[index]
+      }));
+      setClasses(fetchedClasses);
+      
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <View style={styles.content}>
         <Text style={styles.title}>Hey Joe!</Text>
         <View style={styles.subtitleContainer}>
           <Text style={styles.subtitle}>Today's Timetable</Text>
-          <Text style={styles.smallText}>Day 1</Text>
+          <Text style={styles.smallText}>Day {cycleDay}</Text>
         </View>
         <View style={styles.greyBox}>
-          <View style={styles.rectangle} />
-          <View style={styles.rectangle} />
-          <View style={styles.rectangle} />
-          <View style={styles.rectangle} />
+          {classes.map((course, index) => (
+            <View key={index} style={styles.rectangle}>
+              <Text style={styles.rectangleText}>{course.ClassCode} - {course.TeacherName}</Text>
+              <Text style={styles.rectangleText}>{course.time}</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.announcementTitle}>Today's Announcements</Text>
+        <View style={styles.grid}>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridHeading}>From</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridHeading}>Announcement</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridText}>Teacher A</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridText}>Meeting at 3 PM</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridText}>Teacher B</Text>
+          </View>
+          <View style={styles.gridItem}>
+            <Text style={styles.gridText}>Homework due tomorrow</Text>
+          </View>
         </View>
       </View>
       <View style={styles.navMenu}>
@@ -92,7 +170,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 20,
     borderRadius: 20,
-    padding: 10,
+    paddingTop: 10,
+    paddingHorizontal: 10,
   },
   rectangle: {
     width: '100%',
@@ -100,6 +179,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFC',
     marginBottom: 10,
     borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  rectangleText: {
+    fontSize: 16,
+    color: '#17171D',
+    fontFamily: 'PhantomSans-Bold',
+  },
+  announcementTitle: {
+    fontSize: 26,
+    fontFamily: 'PhantomSans-Medium',
+    color: '#F9FAFC',
+    marginLeft: 20,
+    marginTop: 20,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  gridItem: {
+    width: '48%',
+    marginBottom: 10,
+  },
+  gridText: {
+    fontSize: 16,
+    color: '#F9FAFC',
+    fontFamily: 'PhantomSans-Book',
+  },
+  gridHeading: {
+    fontSize: 20,
+    color: '#F9FAFC',
+    fontFamily: 'PhantomSans-Bold',
   },
   navMenu: {
     width: '80%',

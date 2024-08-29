@@ -4,7 +4,7 @@ import json
 #ddmmyyyy
 date = "06092024"
 
-url = f"https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/{date}"
+url = f"https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/{date}/{date}"
 headers = {
     "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|False",
     "Authorization": "Bearer " + "x"

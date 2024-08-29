@@ -3,8 +3,8 @@ import requests
 url = 'https://zappsmaprd.tdsb.on.ca/token'
 
 payload = {
-    'username': '',
-    'password': '',
+    'username': '350317627',
+    'password': 'H1z2AK74-t@280',
     'grant_type': 'password'
 }
 

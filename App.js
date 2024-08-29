@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useFonts } from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignIn from './SignIn'; 
 import Home from './Home'; 
 
@@ -17,7 +18,17 @@ function App() {
     'PhantomSans-Semibold': require('./assets/fonts/PhantomSans0.5-Semibold.ttf'),
   });
 
-  if (!fontsLoaded) {
+  const [initialRoute, setInitialRoute] = React.useState(null);
+
+  React.useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem('access_token');
+      setInitialRoute(token ? 'Home' : 'SignIn');
+    };
+    checkToken();
+  }, []);
+
+  if (!fontsLoaded || initialRoute === null) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -27,15 +38,11 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{ headerShown: false }} 
-        />
-        <Stack.Screen name="Home" component={Home} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SignIn" component={SignIn} />
+      <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
+  </NavigationContainer>
   );
 }
 

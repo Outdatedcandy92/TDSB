@@ -1,49 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
-const Home = () => {
-  const [storedItem, setStoredItem] = useState(null);
-  const [studentInfo, setStudentInfo] = useState(null);
-
-  useEffect(() => {
-    const fetchStoredItem = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        if (token !== null) {
-          console.log('Stored item:', token);
-          setStoredItem(token);
-
-          const url = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo';
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|False"
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-
-          const data = await response.json();
-          console.log('Response data:', data);
-          const studentInfo = data['SchoolCodeList'][0]['StudentInfo'];
-          setStudentInfo(studentInfo);
-
-          console.log('Student Info:', studentInfo);
-        } else {
-          console.log('No item found in storage.');
-        }
-      } catch (error) {
-        console.error('Failed to fetch the item from storage or send request', error);
-      }
-    };
-
-    fetchStoredItem();
-  }, []);
-
+const Home = ({ navigation }) => {
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('access_token');
@@ -57,19 +17,29 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Welcome to the Home Screen!</Text>
-      {studentInfo ? (
-        <>
-          <Text>Name: {studentInfo.FirstName} {studentInfo.LastName}</Text>
-          <Text>Age: {studentInfo.Age}</Text>
-          <Text>Gender: {studentInfo.Gender}</Text>
-          <Text>Grade: {studentInfo.CurrentGradeLevel}</Text>
-        </>
-      ) : (
-        <Text>Loading student information...</Text>
-      )}
-
-      <Button title="Logout" onPress={handleLogout} />
+      <View style={styles.content}>
+        <Text style={styles.title}>Hey Joe!</Text>
+        <View style={styles.subtitleContainer}>
+          <Text style={styles.subtitle}>Today's Timetable</Text>
+          <Text style={styles.smallText}>Day 1</Text>
+        </View>
+        <View style={styles.greyBox} />
+      </View>
+      <View style={styles.navMenu}>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen1')}>
+          <Ionicons name="home-outline" size={36} color="#17171D" />
+          <View style={styles.redLine} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen2')}>
+          <Ionicons name="school-outline" size={36} color="#17171D" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen3')}>
+          <Ionicons name="megaphone-outline" size={36} color="#17171D" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
+          <Ionicons name="calendar-outline" size={36} color="#17171D" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -77,9 +47,63 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center', 
+    padding: 16,
+    backgroundColor: '#17171D',
+  },
+  content: {
+    width: '100%',
+    alignItems: 'flex-start',
+  },
+  title: {
+    fontSize: 40,
     fontFamily: 'PhantomSans-Bold',
+    color: '#F9FAFC',
+    marginLeft: 20,
+    marginTop: 40,
+  },
+  subtitleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 50,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#F9FAFC',
+  },
+  smallText: {
+    fontSize: 14,
+    color: '#F9FAFC',
+  },
+  greyBox: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#ccc',
+    marginTop: 10,
+  },
+  navMenu: {
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#F9FAFC',
+    borderRadius: 30,
+    alignSelf: 'center', 
+  },
+  navButton: {
+    padding: 2,
+  },
+  redLine: {
+    width: '100%',
+    height: 4,
+    backgroundColor: 'red',
+    marginTop: 2,
+    borderRadius: 2,
   },
 });
 

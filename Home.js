@@ -28,7 +28,7 @@ const Home = ({ navigation }) => {
       const response = await fetch(`https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/${date}`, { //get school code from student info
         method: 'GET',
         headers: {
-          "X-Client-App-Info": "Android||2024Oct01120000P|False|.2.6|False|306|",
+          "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|",
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
@@ -47,7 +47,7 @@ const Home = ({ navigation }) => {
         setCycleDay(cycleDayValue);
       }
 
-      const timeRanges = [
+      const timeRanges = [ //TODO: GET THE TIME FROM THE DATA
         "9:00-10:20",
         "10:25-11:40",
         "12:40-1:55",
@@ -59,7 +59,7 @@ const Home = ({ navigation }) => {
         time: timeRanges[index]
       }));
       setClasses(fetchedClasses);
-      
+
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -108,21 +108,21 @@ const Home = ({ navigation }) => {
           </View>
         </View>
       </View>
-      <View style={styles.navMenu}>
+      {/* <View style={styles.navMenu}>
         <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen1')}>
           <Ionicons name="home-outline" size={36} color="#17171D" />
           <View style={styles.redLine} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen2')}>
-          <Ionicons name="school-outline" size={36} color="#17171D" />
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Timetable')}>
+  <Ionicons name="school-outline" size={36} color="#17171D" />
+</TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen3')}>
           <Ionicons name="megaphone-outline" size={36} color="#17171D" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
           <Ionicons name="calendar-outline" size={36} color="#17171D" />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     padding: 16,
     backgroundColor: '#17171D',
   },
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#F9FAFC',
     borderRadius: 30,
-    alignSelf: 'center', 
+    alignSelf: 'center',
   },
   navButton: {
     padding: 2,

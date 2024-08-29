@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,24 +14,6 @@ import Announcements from './Announcements';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
-const screenOptions = {
-  headerShown: false,
-  cardStyleInterpolator: ({ current, layouts }) => {
-    return {
-      cardStyle: {
-        transform: [
-          {
-            translateX: current.progress.interpolate({
-              inputRange: [0, 1],
-              outputRange: [layouts.screen.width, 0],
-            }),
-          },
-        ],
-      },
-    };
-  },
-};
 
 function HomeTabs() {
   return (
@@ -52,7 +34,7 @@ function HomeTabs() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: 'tomato',
+        tabBarActiveTintColor: 'red',
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -73,13 +55,13 @@ function HomeTabs() {
           marginTop: 5,
         },
         headerShown: false,
-        ...TransitionPresets.SlideFromRightIOS,
       })}
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Timetable" component={Timetable} />
-      <Tab.Screen name="Calendar" component={Calendar} />
       <Tab.Screen name="Announcements" component={Announcements} />
+      <Tab.Screen name="Calendar" component={Calendar} />
+      
     </Tab.Navigator>
   );
 }
@@ -114,7 +96,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRoute} screenOptions={screenOptions}>
+      <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="HomeTabs" component={HomeTabs} />
       </Stack.Navigator>

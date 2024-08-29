@@ -23,7 +23,12 @@ const Home = ({ navigation }) => {
           <Text style={styles.subtitle}>Today's Timetable</Text>
           <Text style={styles.smallText}>Day 1</Text>
         </View>
-        <View style={styles.greyBox} />
+        <View style={styles.greyBox}>
+          <View style={styles.rectangle} />
+          <View style={styles.rectangle} />
+          <View style={styles.rectangle} />
+          <View style={styles.rectangle} />
+        </View>
       </View>
       <View style={styles.navMenu}>
         <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen1')}>
@@ -66,23 +71,35 @@ const styles = StyleSheet.create({
   subtitleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-end',
     width: '100%',
+    marginTop: 40,
     paddingHorizontal: 20,
-    marginTop: 50,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 26,
+    fontFamily: 'PhantomSans-Medium',
     color: '#F9FAFC',
   },
   smallText: {
-    fontSize: 14,
+    fontFamily: 'PhantomSans-Medium',
+    fontSize: 20,
     color: '#F9FAFC',
   },
   greyBox: {
+    width: '90%',
+    backgroundColor: '#8492A6',
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 20,
+    padding: 10,
+  },
+  rectangle: {
     width: '100%',
-    height: 100,
-    backgroundColor: '#ccc',
-    marginTop: 10,
+    height: 50,
+    backgroundColor: '#F9FAFC',
+    marginBottom: 10,
+    borderRadius: 10,
   },
   navMenu: {
     width: '80%',

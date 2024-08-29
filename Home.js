@@ -81,7 +81,7 @@ const Home = ({ navigation }) => {
         <View style={styles.greyBox}>
           {classes.map((course, index) => (
             <View key={index} style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{course.ClassCode} - {course.TeacherName}</Text>
+              <Text style={styles.rectangleText}>{course.ClassCode}  {course.TeacherName}</Text>
               <Text style={styles.rectangleText}>{course.time}</Text>
             </View>
           ))}
@@ -108,21 +108,6 @@ const Home = ({ navigation }) => {
           </View>
         </View>
       </View>
-      {/* <View style={styles.navMenu}>
-        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen1')}>
-          <Ionicons name="home-outline" size={36} color="#17171D" />
-          <View style={styles.redLine} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Timetable')}>
-  <Ionicons name="school-outline" size={36} color="#17171D" />
-</TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Screen3')}>
-          <Ionicons name="megaphone-outline" size={36} color="#17171D" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
-          <Ionicons name="calendar-outline" size={36} color="#17171D" />
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 };

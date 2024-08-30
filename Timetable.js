@@ -29,7 +29,7 @@ const Timetable = ({ navigation }) => {
         throw new Error('No access token found');
       }
 
-      // Recalculate the date based on
+      // Recalculate the date based on activeDate
       const [day, month, year] = activeDate.split('/');
       const formattedDate = `${day}${month}${year}`;
 
@@ -49,9 +49,10 @@ const Timetable = ({ navigation }) => {
         const parsedClasses = data.CourseTable.map(course => ({
           ClassCode: course.StudentCourse.ClassCode,
           TeacherName: course.StudentCourse.TeacherName,
-          StartTime: new Date(course.StudentCourse.StartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          EndTime: new Date(course.StudentCourse.EndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          StartTime: new Date(course.StudentCourse.StartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),
+          EndTime: new Date(course.StudentCourse.EndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),      
           ClassName: course.StudentCourse.ClassName,
+          RoomNo: course.StudentCourse.RoomNo,
         }));
         setClasses(parsedClasses);
       } catch (error) {
@@ -63,6 +64,18 @@ const Timetable = ({ navigation }) => {
 
   const weekDates = getWeekDates(date);
   const weekRange = getWeekRange(weekDates);
+
+  const truncateClassName = (name) => {
+    const words = name.split(' ');
+    let truncatedName = words[0];
+    for (let i = 1; i < words.length; i++) {
+      if ((truncatedName + ' ' + words[i]).length > 15) { //cut off long class names to short ones (communications technology to communications)
+        break;
+      }
+      truncatedName += ' ' + words[i];
+    }
+    return truncatedName;
+  };
 
   return (
     <View style={styles.container}>
@@ -93,13 +106,31 @@ const Timetable = ({ navigation }) => {
         </View>
 
         <View style={styles.greyBox}>
-          {classes.map((course, index) => (
-            <View key={index} style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{course.ClassCode} - {course.ClassName}</Text>
-              <Text style={styles.rectangleText}>{course.TeacherName}</Text>
-              <Text style={styles.rectangleText}>{course.StartTime} - {course.EndTime}</Text>
-            </View>
-          ))}
+          {classes.length === 0 ? (
+            <Text style={styles.noCoursesText}>No Courses to show for this day</Text>
+          ) : (
+            classes.map((course, index) => (
+              <View key={index} style={styles.rectangle}>
+                <View style={styles.leftColumn}>
+                  <Text 
+                    style={[styles.rectangleText, styles.className]}
+                    numberOfLines={1} 
+                    ellipsizeMode="tail"
+                  >
+                    {truncateClassName(course.ClassName)}
+                  </Text>
+                  <Text style={styles.rectangleText}>{course.ClassCode}</Text>
+                  <Text style={styles.rectangleText}>{course.TeacherName}</Text>
+                </View>
+                <View style={styles.rightColumn}>
+                  <Text style={[styles.rectangleText, styles.classTime]}>
+                    {course.StartTime} - {course.EndTime}
+                  </Text>
+                  <Text style={styles.rectangleText}>Room: {course.RoomNo}</Text>
+                </View>
+              </View>
+            ))
+          )}
         </View>
       </View>
     </View>
@@ -210,16 +241,42 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingHorizontal: 10,
   },
+  noCoursesText: {
+    fontSize: 16,
+    color: '#17171D',
+    fontFamily: 'PhantomSans-Bold',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
   rectangle: {
     width: '100%',
     backgroundColor: '#F9FAFC',
     marginBottom: 10,
     borderRadius: 10,
     padding: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  leftColumn: {
+    flex: 2,
+    justifyContent: 'space-between',
+  },
+  rightColumn: {
+    flex: 2,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   rectangleText: {
     fontSize: 16,
     color: '#17171D',
+    fontFamily: 'PhantomSans-Medium',
+  },
+  className: {
+    fontSize: 18,
+    fontFamily: 'PhantomSans-Bold',
+  },
+  classTime: {
+    fontSize: 18,
     fontFamily: 'PhantomSans-Bold',
   },
 });

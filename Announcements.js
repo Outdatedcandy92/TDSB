@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const Calendar = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Announcementc</Text>
+      <Text style={styles.title}>Announcements</Text>
 
     </View>
   );

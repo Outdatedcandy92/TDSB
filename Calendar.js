@@ -11,8 +11,7 @@ const parseDateInput = (dateString) => {
   return new Date(year, month, day);
 };
 
-
-const inputDate = "02092024"; // ddmmyyyy
+const inputDate = "02092024";
 
 const CalendarComponent = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -24,9 +23,7 @@ const CalendarComponent = () => {
       try {
         const storedEvents = await AsyncStorage.getItem('events');
         if (storedEvents) {
-          console.log('Events data exists in AsyncStorage');
           const events = JSON.parse(storedEvents);
-          console.log('Stored events:', events);
           setEvents(events);
         } else {
           const token = await AsyncStorage.getItem('access_token');
@@ -37,13 +34,12 @@ const CalendarComponent = () => {
 
           const url = "https://zappsmaprd.tdsb.on.ca/api/GoogleCalendar/GetEvents/1013?timeMin=09%2F01%2F2024%2000%3A00%3A00&timeMax=09%2F30%2F2024%2023%3A59%3A59";
           const headers = {
-            "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|False",
+            "X-Client-App-Info": "Android||2024Oct01120000P|False1.2.6|False|306False",
             "Authorization": `Bearer ${token}`
           };
 
           const response = await fetch(url, { headers });
           const data = await response.json();
-          console.log('Fetched events:', data);
           setEvents(data);
           await AsyncStorage.setItem('events', JSON.stringify(data));
         }
@@ -72,7 +68,7 @@ const CalendarComponent = () => {
     const firstDayOfMonth = getFirstDayOfMonth(month, year);
 
     let days = [];
-    let startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; 
+    let startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
     for (let i = 0; i < startDay; i++) {
       days.push(null);
@@ -93,13 +89,22 @@ const CalendarComponent = () => {
 
   const handleDatePress = (date) => {
     setSelectedDate(date);
-    console.log('Selected date:', date);
+  };
+
+  const stripHtmlTags = (htmlString) => {
+    return htmlString.replace(/<\/?b>/g, '').split('<br>').map((segment, index) => (
+      <Text key={index} style={styles.eventDescription}>
+        {segment.trim()}
+      </Text>
+    ));
   };
 
   const renderEvent = ({ item }) => (
     <View style={styles.eventContainer}>
       <Text style={styles.eventText}>{item.summary}</Text>
-      <Text style={styles.eventText}>{item.description}</Text>
+      <View>
+        {stripHtmlTags(item.description)}
+      </View>
     </View>
   );
 
@@ -122,8 +127,6 @@ const CalendarComponent = () => {
         return eventDate.getTime() === selectedNormalizedDate.getTime();
       })
     : [];
-
-  console.log('Filtered events for selected date:', filteredEvents);
 
   return (
     <View style={styles.container}>
@@ -165,12 +168,16 @@ const CalendarComponent = () => {
           ))}
         </View>
         {selectedDate && (
-          <FlatList
-            data={filteredEvents}
-            renderItem={renderEvent}
-            keyExtractor={(item) => item.id}
-            style={styles.eventList}
-          />
+          filteredEvents.length > 0 ? (
+            <FlatList
+              data={filteredEvents}
+              renderItem={renderEvent}
+              keyExtractor={(item) => item.id}
+              style={styles.eventList}
+            />
+          ) : (
+            <Text style={styles.noEventsText}>No events exist for this date.</Text>
+          )
         )}
       </View>
     </View>
@@ -207,22 +214,22 @@ const styles = StyleSheet.create({
   calendar: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    width: '80%', 
+    width: '80%',
     justifyContent: 'center',
   },
   dayOfWeekContainer: {
-    width: screenWidth / 10, 
+    width: screenWidth / 10,
     height: screenWidth / 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dayOfWeekText: {
-    fontSize: 14, 
+    fontSize: 14,
     fontFamily: 'PhantomSans-Medium',
     color: '#F9FAFC',
   },
   dateWrapper: {
-    width: screenWidth / 10, 
+    width: screenWidth / 10,
     height: screenWidth / 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -240,7 +247,7 @@ const styles = StyleSheet.create({
   },
   selectedDateContainer: {
     backgroundColor: '#EC3750',
-    borderRadius: screenWidth / 20, 
+    borderRadius: screenWidth / 20,
   },
   selectedDateText: {
     color: '#F9FAFC',
@@ -259,6 +266,15 @@ const styles = StyleSheet.create({
   eventText: {
     color: '#F9FAFC',
     fontSize: 16,
+  },
+  eventDescription: {
+    color: '#F9FAFC',
+    fontSize: 14,
+  },
+  noEventsText: {
+    color: '#F9FAFC',
+    fontSize: 16,
+    marginTop: 20,
   },
 });
 

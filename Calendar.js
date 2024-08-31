@@ -92,11 +92,20 @@ const CalendarComponent = () => {
   };
 
   const stripHtmlTags = (htmlString) => {
-    return htmlString.replace(/<\/?b>/g, '').split('<br>').map((segment, index) => (
-      <Text key={index} style={styles.eventDescription}>
-        {segment.trim()}
-      </Text>
-    ));
+    if (!htmlString) return null;
+
+    return htmlString
+      .replace(/<\/?b>/g, '') 
+      .replace(/<\/?p>/g, '') 
+      .replace(/<\/?ul>/g, '') 
+      .replace(/<li>/g, '') 
+      .replace(/<\/li>/g, '<br>') 
+      .split('<br>') 
+      .map((segment, index) => (
+        <Text key={index} style={styles.eventDescription}>
+          {segment.trim()}
+        </Text>
+      ));
   };
 
   const renderEvent = ({ item }) => (
@@ -255,7 +264,7 @@ const styles = StyleSheet.create({
   },
   eventList: {
     marginTop: 20,
-    width: '100%',
+    width: '85%',
   },
   eventContainer: {
     backgroundColor: '#2A2A2E',
@@ -266,15 +275,18 @@ const styles = StyleSheet.create({
   eventText: {
     color: '#F9FAFC',
     fontSize: 16,
+    fontFamily: 'PhantomSans-Bold',
   },
   eventDescription: {
     color: '#F9FAFC',
     fontSize: 14,
+    fontFamily: 'PhantomSans-Regular',
   },
   noEventsText: {
     color: '#F9FAFC',
     fontSize: 16,
     marginTop: 20,
+    fontFamily: 'PhantomSans-Regular',
   },
 });
 

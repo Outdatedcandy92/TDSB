@@ -9,11 +9,9 @@ const Settings = () => {
     useEffect(() => {
         setLogs(global.logs);
 
-
         const interval = setInterval(() => {
             setLogs([...global.logs]);
         }, 1000);
-
 
         return () => clearInterval(interval);
     }, []);
@@ -42,7 +40,7 @@ const Settings = () => {
             >
                 {logs.length > 0 ? (
                     logs.map((log, index) => (
-                        <Text key={index} style={styles.logText}>{log}</Text>
+                        <Text key={index} style={styles.logText}>{`> ${log}`}</Text>
                     ))
                 ) : (
                     <Text style={styles.noLogsText}>No logs available</Text>

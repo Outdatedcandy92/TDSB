@@ -92,7 +92,7 @@ function App() {
   React.useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      console.log('token successfully retrieved:', token);
+      console.log('token successfully retrieved:');
       setInitialRoute(token ? 'HomeTabs' : 'SignIn');
     };
     checkToken();

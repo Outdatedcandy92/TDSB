@@ -37,6 +37,9 @@ export default function SignIn({ navigation }) {
 
             if (data.access_token) {
                 await AsyncStorage.setItem('access_token', data.access_token);
+
+                await Keychain.setGenericPassword(username, password);
+
                 navigation.navigate('HomeTabs', {
                     screen: 'Home',
                   });

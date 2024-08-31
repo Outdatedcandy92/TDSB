@@ -32,7 +32,18 @@ const CalendarComponent = () => {
             return;
           }
 
-          const url = "https://zappsmaprd.tdsb.on.ca/api/GoogleCalendar/GetEvents/1013?timeMin=09%2F01%2F2024%2000%3A00%3A00&timeMax=09%2F30%2F2024%2023%3A59%3A59";
+
+          // mm/dd/yyyy hh:mm:ss
+          const TimeMindateString = "09/02/2024 00:00:00";
+          const TimeMaxdateString = "10/02/2024 00:00:00";
+
+
+          const TimeMin = encodeURIComponent(TimeMindateString);
+          const TimeMax= encodeURIComponent(TimeMaxdateString);
+        
+
+
+          const url = `https://zappsmaprd.tdsb.on.ca/api/GoogleCalendar/GetEvents/1013?timeMin=${TimeMin}&timeMax=${TimeMax}`; 
           const headers = {
             "X-Client-App-Info": "Android||2024Oct01120000P|False1.2.6|False|306False",
             "Authorization": `Bearer ${token}`

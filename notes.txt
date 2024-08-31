@@ -6,6 +6,8 @@ Features I want-
 - Caching of timetable/stuff for offline work
 
 
+-add a dev page
+
 PAGES
 
 Login Page

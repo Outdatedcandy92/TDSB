@@ -11,9 +11,19 @@ import Home from './Home';
 import Timetable from './Timetable';
 import Calendar from './Calendar';
 import Announcements from './Announcements';
+import Settings from './Settings';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+global.logs = [];
+
+
+const originalConsoleLog = console.log;
+console.log = (...args) => {
+  originalConsoleLog(...args);
+  global.logs.push(args.join(' '));
+};
 
 function HomeTabs() {
   return (
@@ -30,6 +40,8 @@ function HomeTabs() {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Announcements') {
             iconName = focused ? 'megaphone' : 'megaphone-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'settings' : 'settings-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -61,7 +73,7 @@ function HomeTabs() {
       <Tab.Screen name="Timetable" component={Timetable} />
       <Tab.Screen name="Announcements" component={Announcements} />
       <Tab.Screen name="Calendar" component={Calendar} />
-      
+      <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );
 }

@@ -12,6 +12,16 @@ This open-source React Native app is designed as an improved alternative to TDSB
 
 The app is designed to streamline the daily experience of TDSB students by offering a faster, more intuitive platform that overcomes the limitations of TDSB Connects. As an open-source project, it invites collaboration and contributions from the community to continuously improve and adapt to users' needs. Whether you're checking your timetable, keeping track of announcements, or managing your calendar, this app delivers the essential tools you need with enhanced performance and usability
 
+
+## Pages
+
+- **Sign In Page**
+- **Home Page**
+- **Timetable Page**
+- **Announcement Page**
+- **Calendar Page**
+- **Dev Page**
+
 ## Key Features
 
 - **Home Page**
@@ -64,3 +74,7 @@ https://github.com/user-attachments/assets/baeea8a8-e4c6-4264-9643-7c44e274a61b
      ```
 
 5. Follow the instructions in the terminal to open the app on an emulator or a physical device using the Expo Go app.
+
+## Looking for Contributions
+
+We welcome contributions from the community to help improve and enhance this app. Whether you have ideas for new features, bug fixes, or optimizations, we appreciate your input. Please feel free to submit pull requests or open issues on our GitHub repository to contribute to the project.

@@ -37,7 +37,9 @@ export default function SignIn({ navigation }) {
 
             if (data.access_token) {
                 await AsyncStorage.setItem('access_token', data.access_token);
-                navigation.navigate('Home');
+                navigation.navigate('HomeTabs', {
+                    screen: 'Home',
+                  });
             } else {
                 alert('Login failed');
             }

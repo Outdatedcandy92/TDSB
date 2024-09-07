@@ -24,3 +24,12 @@ Login Page
 
 4. Calender Page
     -shows calender and events    
+
+
+TODO:
+
+regen the token when about to expire
+properly store the school id
+store the school name properly
+proper caching events
+anncouncements feature

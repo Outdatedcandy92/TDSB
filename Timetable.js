@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, StatusBar, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const Timetable = ({ navigation }) => {
-  const initialDateStr = "03092024"; // ddmmyyyy
+  const fdate = new Date();
+  const day = String(fdate.getDate()).padStart(2, '0');
+  const month = String(fdate.getMonth() + 1).padStart(2, '0');
+  const year = fdate.getFullYear();
+  const initialDateStr = `${day}${month}${year}`;
+
   let date = initialDateStr;
   let formattedDate = `${date.slice(0, 2)}/${date.slice(2, 4)}/${date.slice(4, 8)}`;
 
   const initialDate = new Date(date.slice(4, 8), date.slice(2, 4) - 1, date.slice(0, 2));
   const dayOfWeek = initialDate.getDay();
-  if (dayOfWeek === 6) { 
+  if (dayOfWeek === 6) {
     initialDate.setDate(initialDate.getDate() + 2);
-  } else if (dayOfWeek === 0) { 
+  } else if (dayOfWeek === 0) {
     initialDate.setDate(initialDate.getDate() + 1);
   }
 
@@ -20,11 +26,13 @@ const Timetable = ({ navigation }) => {
 
   const [activeDate, setActiveDate] = useState(formattedDate);
   const [classes, setClasses] = useState([]);
+  const [currentDate, setCurrentDate] = useState(initialDate);
 
   useEffect(() => {
     console.log(`Selected active date: ${activeDate}`);
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('access_token');
+      const schoolId = await AsyncStorage.getItem('school_code');
       if (!token) {
         throw new Error('No access token found');
       }
@@ -34,8 +42,8 @@ const Timetable = ({ navigation }) => {
       const formattedDate = `${day}${month}${year}`;
 
       console.log('Fetching data for date:', activeDate, 'formatted as:', formattedDate);
-      const url = `https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/${formattedDate}`;
-      
+      const url = `https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/${schoolId}/${formattedDate}`;
+
       try {
         const response = await fetch(url, {
           headers: {
@@ -44,13 +52,14 @@ const Timetable = ({ navigation }) => {
             'Content-Type': 'application/json',
           }
         });
+
         const data = await response.json();
         console.log('Fetched data:', data);
         const parsedClasses = data.CourseTable.map(course => ({
           ClassCode: course.StudentCourse.ClassCode,
           TeacherName: course.StudentCourse.TeacherName,
           StartTime: new Date(course.StudentCourse.StartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),
-          EndTime: new Date(course.StudentCourse.EndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),      
+          EndTime: new Date(course.StudentCourse.EndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),
           ClassName: course.StudentCourse.ClassName,
           RoomNo: course.StudentCourse.RoomNo,
         }));
@@ -62,7 +71,53 @@ const Timetable = ({ navigation }) => {
     fetchData();
   }, [activeDate]);
 
-  const weekDates = getWeekDates(date);
+  const getWeekDates = (date) => {
+    const day = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const currentDate = new Date(year, month, day);
+    const dayOfWeek = currentDate.getDay();
+    const monday = new Date(currentDate);
+    monday.setDate(currentDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust if the date is a Sunday
+
+    const weekDates = [];
+    for (let i = 0; i < 5; i++) {
+      const currentDay = new Date(monday);
+      currentDay.setDate(monday.getDate() + i);
+      weekDates.push({
+        day: currentDay.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3),
+        date: currentDay.toLocaleDateString('en-GB', { day: '2-digit' }),
+        fullDate: currentDay,
+      });
+    }
+
+    return weekDates;
+  };
+
+  const getWeekRange = (weekDates) => {
+    const startDate = weekDates[0].fullDate;
+    const endDate = weekDates[4].fullDate;
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const startString = startDate.toLocaleDateString('en-US', options).toUpperCase();
+    const endString = endDate.toLocaleDateString('en-US', options).toUpperCase();
+    return `${startString} - ${endString}`;
+  };
+
+  const incrementWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + 7);
+    setCurrentDate(newDate);
+    setActiveDate(newDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+  };
+
+  const decrementWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() - 7);
+    setCurrentDate(newDate);
+    setActiveDate(newDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }));
+  };
+
+  const weekDates = getWeekDates(currentDate);
   const weekRange = getWeekRange(weekDates);
 
   const truncateClassName = (name) => {
@@ -83,7 +138,15 @@ const Timetable = ({ navigation }) => {
       <View style={styles.content}>
         <Text style={styles.title}>Timetable</Text>
         <View style={styles.weekContainer}>
-          <Text style={styles.weekRangeText}>{weekRange}</Text>
+          <View style={styles.weekforward}>
+            <TouchableOpacity onPress={decrementWeek}>
+              <Ionicons name="chevron-back" size={24} color="#F9FAFC" />
+            </TouchableOpacity>
+            <Text style={styles.weekRangeText}>{weekRange}</Text>
+            <TouchableOpacity onPress={incrementWeek}>
+              <Ionicons name="chevron-forward" size={24} color="#F9FAFC" />
+            </TouchableOpacity>
+          </View>
           <View style={styles.daysRow}>
             {weekDates.map((day, index) => {
               const dayFormattedDate = day.fullDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -104,7 +167,6 @@ const Timetable = ({ navigation }) => {
             })}
           </View>
         </View>
-
         <View style={styles.greyBox}>
           {classes.length === 0 ? (
             <Text style={styles.noCoursesText}>No Courses to show for this day</Text>
@@ -112,9 +174,9 @@ const Timetable = ({ navigation }) => {
             classes.map((course, index) => (
               <View key={index} style={styles.rectangle}>
                 <View style={styles.leftColumn}>
-                  <Text 
+                  <Text
                     style={[styles.rectangleText, styles.className]}
-                    numberOfLines={1} 
+                    numberOfLines={1}
                     ellipsizeMode="tail"
                   >
                     {truncateClassName(course.ClassName)}
@@ -135,38 +197,6 @@ const Timetable = ({ navigation }) => {
       </View>
     </View>
   );
-};
-
-const getWeekDates = (dateString) => {
-  const day = parseInt(dateString.slice(0, 2), 10);
-  const month = parseInt(dateString.slice(2, 4), 10) - 1; 
-  const year = parseInt(dateString.slice(4, 8), 10);
-  const date = new Date(year, month, day);
-  const dayOfWeek = date.getDay();
-  const monday = new Date(date);
-  monday.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust if the date is a Sunday
-
-  const weekDates = [];
-  for (let i = 0; i < 5; i++) {
-    const currentDay = new Date(monday);
-    currentDay.setDate(monday.getDate() + i);
-    weekDates.push({
-      day: currentDay.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 3),
-      date: currentDay.toLocaleDateString('en-GB', { day: '2-digit' }),
-      fullDate: currentDay,
-    });
-  }
-
-  return weekDates;
-};
-
-const getWeekRange = (weekDates) => {
-  const startDate = weekDates[0].fullDate;
-  const endDate = weekDates[4].fullDate;
-  const options = { month: 'short', day: 'numeric', year: 'numeric' };
-  const startString = startDate.toLocaleDateString('en-US', options).toUpperCase();
-  const endString = endDate.toLocaleDateString('en-US', options).toUpperCase();
-  return `${startString} - ${endString}`;
 };
 
 const styles = StyleSheet.create({
@@ -278,6 +308,17 @@ const styles = StyleSheet.create({
   classTime: {
     fontSize: 18,
     fontFamily: 'PhantomSans-Bold',
+  },
+  arrow: {
+    fontSize: 24,
+    color: '#F9FAFC',
+    marginHorizontal: 10,
+  },
+  weekforward: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
 

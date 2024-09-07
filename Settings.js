@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const Settings = () => {
     const [logs, setLogs] = useState([]);
     const scrollViewRef = useRef();
+    const navigation = useNavigation();
 
     useEffect(() => {
         setLogs(global.logs);
@@ -20,7 +22,10 @@ const Settings = () => {
         try {
             await AsyncStorage.removeItem('access_token');
             console.log('Logged out successfully');
-            window.location.reload();
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+            });
         } catch (error) {
             console.error('Error logging out:', error);
         }
@@ -46,6 +51,7 @@ const Settings = () => {
                     <Text style={styles.noLogsText}>No logs available</Text>
                 )}
             </ScrollView>
+            <Text style={styles.versionText}>v1.1.0-beta.1</Text>
         </View>
     );
 };
@@ -98,6 +104,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'PhantomSans-Regular',
     },
+    versionText: {
+        color: '#F9FAFC',
+        fontSize: 14,
+        fontFamily: 'PhantomSans-Regular',
+        marginTop: 20,
+    }
 });
 
 export default Settings;

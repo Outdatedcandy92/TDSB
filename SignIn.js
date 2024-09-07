@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
-
 
 export default function SignIn({ navigation }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isRememberMe, setIsRememberMe] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
+        setLoading(true);
         console.log({ username, password, isRememberMe });
 
         const url = 'https://zappsmaprd.tdsb.on.ca/token';
@@ -33,74 +34,109 @@ export default function SignIn({ navigation }) {
             });
             const data = await response.json();
 
-            console.log("data: ",data);
+            console.log("data: ", data);
 
             if (data.access_token) {
                 await AsyncStorage.setItem('access_token', data.access_token);
 
-                await Keychain.setGenericPassword(username, password);
+                // Fetch user data
+                const additionalUrl = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo';
+                const additionalResponse = await fetch(additionalUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${data.access_token}`,
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|",
+                        "Accept": "application/json"
+                    }
+                });
+                const additionalData = await additionalResponse.json();
+                console.log("additionalData fetched ");
+    
+                // Extract SchoolCode and FirstName
+                const schoolCode = additionalData.SchoolCodeList[0].SchoolCode;
+                const firstName = additionalData.SchoolCodeList[0].StudentInfo.FirstName;
 
+                console.log("schoolCode: ", schoolCode);
+                console.log("firstName: ", firstName);
+    
+                // Store the extracted values in AsyncStorage
+                await AsyncStorage.setItem('school_code', schoolCode);
+                await AsyncStorage.setItem('first_name', firstName);
+    
+                // Navigate to home screen
                 navigation.navigate('HomeTabs', {
                     screen: 'Home',
-                  });
+                });
             } else {
                 alert('Login failed');
             }
         } catch (error) {
             console.error(error);
             alert('An error occurred');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIconContainer}>
-                <Ionicons name="arrow-back" size={24} color="#F9FAFC" />
-            </TouchableOpacity>
-            <View style={styles.innerContainer}>
-                <Text style={styles.title}>Sign In</Text>
-                <View style={styles.formContainer}>
-                    <View style={styles.formGroup}>
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="person" size={24} color="#F9FAFC" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="9 Digit Student Number"
-                                placeholderTextColor="#F9FAFC"
-                                value={username}
-                                onChangeText={setUsername}
-                            />
-                        </View>
-                    </View>
-                    <View style={styles.formGroup}>
-                        <View style={styles.passwordContainer}>
-                            <Ionicons name="lock-closed" size={24} color="#F9FAFC" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.passwordInput}
-                                placeholder="Password"
-                                placeholderTextColor="#F9FAFC"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={!isPasswordVisible}
-                            />
-                            <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeIconContainer}>
-                                <Ionicons name={isPasswordVisible ? "eye-off" : "eye"} size={24} color="#F9FAFC" style={styles.eyeIcon} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                    <View style={styles.rememberMeContainer}>
-                        <TouchableOpacity onPress={() => setIsRememberMe(!isRememberMe)} style={styles.radioButton}>
-                            {isRememberMe && <View style={styles.radioButtonSelected} />}
-                        </TouchableOpacity>
-                        <Text style={styles.rememberMeText}>Remember Me</Text>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>Login</Text>
-                        </TouchableOpacity>
-                    </View>
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#F9FAFC" />
+                    <Text style={styles.loadingText}>Signing in...</Text>
                 </View>
-            </View>
+            ) : (
+                <>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backIconContainer}>
+                        <Ionicons name="arrow-back" size={24} color="#F9FAFC" />
+                    </TouchableOpacity>
+                    <View style={styles.innerContainer}>
+                        <Text style={styles.title}>Sign In</Text>
+                        <View style={styles.formContainer}>
+                            <View style={styles.formGroup}>
+                                <View style={styles.inputContainer}>
+                                    <Ionicons name="person" size={24} color="#F9FAFC" style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="9 Digit Student Number"
+                                        placeholderTextColor="#F9FAFC"
+                                        value={username}
+                                        onChangeText={setUsername}
+                                    />
+                                </View>
+                            </View>
+                            <View style={styles.formGroup}>
+                                <View style={styles.passwordContainer}>
+                                    <Ionicons name="lock-closed" size={24} color="#F9FAFC" style={styles.inputIcon} />
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="Password"
+                                        placeholderTextColor="#F9FAFC"
+                                        value={password}
+                                        onChangeText={setPassword}
+                                        secureTextEntry={!isPasswordVisible}
+                                    />
+                                    <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeIconContainer}>
+                                        <Ionicons name={isPasswordVisible ? "eye-off" : "eye"} size={24} color="#F9FAFC" style={styles.eyeIcon} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <View style={styles.rememberMeContainer}>
+                                <TouchableOpacity onPress={() => setIsRememberMe(!isRememberMe)} style={styles.radioButton}>
+                                    {isRememberMe && <View style={styles.radioButtonSelected} />}
+                                </TouchableOpacity>
+                                <Text style={styles.rememberMeText}>Remember Me</Text>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                                    <Text style={styles.buttonText}>Login</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </>
+            )}
         </View>
     );
 }
@@ -216,5 +252,14 @@ const styles = StyleSheet.create({
         color: '#F9FAFC',
         fontFamily: 'PhantomSans-Semibold',
         fontSize: 23,
+    },
+    loadingContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        color: '#F9FAFC',
+        fontSize: 18,
     },
 });

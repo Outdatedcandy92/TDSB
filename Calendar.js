@@ -11,10 +11,14 @@ const parseDateInput = (dateString) => {
   return new Date(year, month, day);
 };
 
-const inputDate = "02092024";
+const fdate = new Date();
+const day = String(fdate.getDate()).padStart(2, '0');
+const month = String(fdate.getMonth() + 1).padStart(2, '0');
+const year = fdate.getFullYear();
+const inputDate = `${day}${month}${year}`;
 
 const CalendarComponent = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(parseDateInput(inputDate));
   const [currentDate, setCurrentDate] = useState(parseDateInput(inputDate));
   const [events, setEvents] = useState([]);
 
@@ -22,9 +26,12 @@ const CalendarComponent = () => {
     const fetchEvents = async () => {
       try {
         const storedEvents = await AsyncStorage.getItem('events');
-        if (storedEvents) {
+
+        //TODO: PROPER CHACHING
+        if (storedEvents===null) {  //null for now
           const events = JSON.parse(storedEvents);
-          setEvents(events);
+          setEvents(Array.isArray(events) ? events : []);
+          console.log('Fetched events from local storage:', events);
         } else {
           const token = await AsyncStorage.getItem('access_token');
           if (!token) {
@@ -33,29 +40,47 @@ const CalendarComponent = () => {
           }
 
 
-          // mm/dd/yyyy hh:mm:ss
-          const TimeMindateString = "09/02/2024 00:00:00";
-          const TimeMaxdateString = "10/02/2024 00:00:00";
+          // const TimeMindateString = "09/02/2024 00:00:00";
+          // const TimeMaxdateString = "10/02/2024 00:00:00";
 
+          const currentMonth = currentDate.getMonth();
+          const currentYear = currentDate.getFullYear();
 
-          const TimeMin = encodeURIComponent(TimeMindateString);
-          const TimeMax= encodeURIComponent(TimeMaxdateString);
-        
+          const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+          const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
 
+          const TimeMinDateString = `${firstDayOfMonth.getMonth() + 1}/${firstDayOfMonth.getDate()}/${firstDayOfMonth.getFullYear()} 00:00:00`;
+          const TimeMaxDateString = `${lastDayOfMonth.getMonth() + 1}/${lastDayOfMonth.getDate()}/${lastDayOfMonth.getFullYear()} 00:00:00`;
 
-          const url = `https://zappsmaprd.tdsb.on.ca/api/GoogleCalendar/GetEvents/1013?timeMin=${TimeMin}&timeMax=${TimeMax}`; 
+          const TimeMin = encodeURIComponent(TimeMinDateString);
+          const TimeMax = encodeURIComponent(TimeMaxDateString);
+
+          console.log('TimeMin:', TimeMin ,`\n`, 'TimeMax:', TimeMax);
+
+          const url = `https://zappsmaprd.tdsb.on.ca/api/GoogleCalendar/GetEvents/1013?timeMin=${TimeMin}&timeMax=${TimeMax}`;
           const headers = {
-            "X-Client-App-Info": "Android||2024Oct01120000P|False1.2.6|False|306False",
+            "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|False",
             "Authorization": `Bearer ${token}`
           };
 
+          console.log('Fetching events with URL:', url);
+          console.log('Headers:', headers);
+
           const response = await fetch(url, { headers });
+          console.log('Response status:', response.status);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
           const data = await response.json();
-          setEvents(data);
+          console.log('Fetched events:', data);
+          setEvents(Array.isArray(data) ? data : []);
           await AsyncStorage.setItem('events', JSON.stringify(data));
         }
       } catch (error) {
         console.error('Error fetching events:', error);
+        setEvents([]); // Fallback to an empty array on error
       }
     };
 
@@ -106,12 +131,12 @@ const CalendarComponent = () => {
     if (!htmlString) return null;
 
     return htmlString
-      .replace(/<\/?b>/g, '') 
-      .replace(/<\/?p>/g, '') 
-      .replace(/<\/?ul>/g, '') 
-      .replace(/<li>/g, '') 
-      .replace(/<\/li>/g, '<br>') 
-      .split('<br>') 
+      .replace(/<\/?b>/g, '')
+      .replace(/<\/?p>/g, '')
+      .replace(/<\/?ul>/g, '')
+      .replace(/<li>/g, '')
+      .replace(/<\/li>/g, '<br>')
+      .split('<br>')
       .map((segment, index) => (
         <Text key={index} style={styles.eventDescription}>
           {segment.trim()}
@@ -142,10 +167,10 @@ const CalendarComponent = () => {
 
   const filteredEvents = selectedDate
     ? events.filter(event => {
-        const eventDate = normalizeDate(new Date(event.start.date));
-        const selectedNormalizedDate = normalizeDate(adjustDate(selectedDate, -1));
-        return eventDate.getTime() === selectedNormalizedDate.getTime();
-      })
+      const eventDate = normalizeDate(new Date(event.start.date));
+      const selectedNormalizedDate = normalizeDate(adjustDate(selectedDate, -1));
+      return eventDate.getTime() === selectedNormalizedDate.getTime();
+    })
     : [];
 
   return (

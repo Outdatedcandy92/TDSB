@@ -40,7 +40,7 @@ The app is designed to streamline the daily experience of TDSB students by offer
     - Stay up-to-date with school announcements directly on the home screen.
     - Explore a dedicated page for detailed updates.
 
-- **Offline Access** $\textcolor{orange}{\textbf{(In Development))}}$
+- **Offline Access** $\textcolor{lightblue}{\textbf{(In Development)}}$
     - Enjoy a responsive experience even without an internet connection.
 
 - **Home Screen/Lock Screen Widget** $\textcolor{orange}{\textbf{(Planned)}}$

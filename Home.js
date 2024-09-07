@@ -1,31 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
   const [classes, setClasses] = useState([]);
   const [cycleDay, setCycleDay] = useState(null);
-
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('access_token');
-      setStoredItem(null);
-      setStudentInfo(null);
-      console.log('Logged out successfully');
-    } catch (error) {
-      console.error('Failed to log out:', error);
-    }
-  };
+  const [firstName, setFirstName] = useState('');
+  const [schoolId, setSchoolId] = useState('');
 
   const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token');
+      const storedFirstName = await AsyncStorage.getItem('first_name');
+      const schoolId = await AsyncStorage.getItem('school_code');
       if (!token) {
         throw new Error('No access token found');
       }
-      const date = "06092024";
-      const response = await fetch(`https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/1013/${date}`, { //get school code from student info
+      if (storedFirstName) {
+        setFirstName(storedFirstName);
+      }
+      if (schoolId) {
+        setSchoolId(schoolId);
+      }
+
+      const fdate = new Date();
+      const day = String(fdate.getDate()).padStart(2, '0');
+      const month = String(fdate.getMonth() + 1).padStart(2, '0'); 
+      const year = fdate.getFullYear();
+      const date = `${day}${month}${year}`;
+
+      console.log(date); 
+      console.log("school id: ", schoolId);
+
+      const response = await fetch(`https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/${schoolId}/${date}`, { //get school code from student info
         method: 'GET',
         headers: {
           "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|",
@@ -47,16 +54,10 @@ const Home = ({ navigation }) => {
         setCycleDay(cycleDayValue);
       }
 
-      const timeRanges = [ //TODO: GET THE TIME FROM THE DATA
-        "9:00-10:20",
-        "10:25-11:40",
-        "12:40-1:55",
-        "2:00-3:15"
-      ];
-
-      const fetchedClasses = data.CourseTable.map((course, index) => ({
+      const fetchedClasses = data.CourseTable.map((course) => ({
         ...course.StudentCourse,
-        time: timeRanges[index]
+        StartTime: new Date(course.StudentCourse.StartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),
+        EndTime: new Date(course.StudentCourse.EndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(/(AM|PM|am|pm|a\.m\.|p\.m\.)/g, '').trim(),
       }));
       setClasses(fetchedClasses);
 
@@ -73,7 +74,7 @@ const Home = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.content}>
-        <Text style={styles.title}>Hey Joe!</Text>
+        <Text style={styles.title}>Hey {firstName}!</Text>
         <View style={styles.subtitleContainer}>
           <Text style={styles.subtitle}>Today's Timetable</Text>
           <Text style={styles.smallText}>Day {cycleDay}</Text>
@@ -82,7 +83,7 @@ const Home = ({ navigation }) => {
           {classes.map((course, index) => (
             <View key={index} style={styles.rectangle}>
               <Text style={styles.rectangleText}>{course.ClassCode}  {course.TeacherName}</Text>
-              <Text style={styles.rectangleText}>{course.time}</Text>
+              <Text style={styles.rectangleText}>{course.StartTime} - {course.EndTime}</Text>
             </View>
           ))}
         </View>

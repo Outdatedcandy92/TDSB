@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "tdsbplus",
+    "name": "TDSB Connects Plus",
     "slug": "tdsbplus",
-    "version": "1.0.0",
+    "version": "1.1.0-beta.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,9 +12,14 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "1.0.0",
+      "bundleIdentifier": "com.hackclub.tdsbplus"
     },
     "android": {
+      "name": "TDSB Connects Plus",
+      "package": "com.outdatedcandy.tdsb",
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -22,6 +27,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0ca0f342-df01-441c-aad2-7aa98a9b80bf"
+      }
     }
   }
 }

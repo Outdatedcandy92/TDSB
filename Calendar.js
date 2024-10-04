@@ -28,7 +28,7 @@ const CalendarComponent = () => {
         const storedEvents = await AsyncStorage.getItem('events');
 
         //TODO: PROPER CHACHING
-        if (storedEvents===null) {  //null for now
+        if (storedEvents==="1") {  //null for now
           const events = JSON.parse(storedEvents);
           setEvents(Array.isArray(events) ? events : []);
           console.log('Fetched events from local storage:', events);

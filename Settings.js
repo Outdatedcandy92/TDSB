@@ -49,7 +49,7 @@ const Settings = () => {
                     <Text style={styles.noLogsText}>No logs available</Text>
                 )}
             </ScrollView>
-            <Text style={styles.versionText}>v1.1.0-beta.2</Text>
+            <Text style={styles.versionText}>v1.1.1-beta.2</Text>
         </View>
     );
 };

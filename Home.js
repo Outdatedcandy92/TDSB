@@ -25,23 +25,24 @@ const Home = ({ navigation }) => {
 
       const fdate = new Date();
       const day = String(fdate.getDate()).padStart(2, '0');
-      const month = String(fdate.getMonth() + 1).padStart(2, '0'); 
+      const month = String(fdate.getMonth() + 1).padStart(2, '0');
       const year = fdate.getFullYear();
       const date = `${day}${month}${year}`;
 
-      console.log(date); 
+      console.log(date);
       console.log("school id: ", schoolId);
 
       const response = await fetch(`https://zappsmaprd.tdsb.on.ca/api/TimeTable/GetTimeTable/Student/${schoolId}/${date}`, { //get school code from student info
         method: 'GET',
         headers: {
-          "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|",
+          "X-Client-App-Info": "TDSBConnectsAPI||||0.0.0||2147483647|",
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
+        console.log(response);
         throw new Error('Network response was not ok');
       }
 
@@ -63,6 +64,10 @@ const Home = ({ navigation }) => {
 
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response text:', await error.response.text());
+      }
     }
   };
 
@@ -77,15 +82,19 @@ const Home = ({ navigation }) => {
         <Text style={styles.title}>Hey {firstName}!</Text>
         <View style={styles.subtitleContainer}>
           <Text style={styles.subtitle}>Today's Timetable</Text>
-          <Text style={styles.smallText}>Day {cycleDay}</Text>
+          <Text style={styles.smallText}>Day {cycleDay || 0}</Text>
         </View>
         <View style={styles.greyBox}>
-          {classes.map((course, index) => (
-            <View key={index} style={styles.rectangle}>
-              <Text style={styles.rectangleText}>{course.ClassCode}  {course.TeacherName}</Text>
-              <Text style={styles.rectangleText}>{course.StartTime} - {course.EndTime}</Text>
-            </View>
-          ))}
+          {classes && classes.length > 0 ? (
+            classes.map((course, index) => (
+              <View key={index} style={styles.rectangle}>
+                <Text style={styles.rectangleText}>{course.ClassCode}  {course.TeacherName}</Text>
+                <Text style={styles.rectangleText}>{course.StartTime} - {course.EndTime}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noTimetableText}>No timetable for today</Text>
+          )}
         </View>
         <Text style={styles.announcementTitle}>Today's Announcements</Text>
         <View style={styles.grid}>
@@ -224,6 +233,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
     borderRadius: 2,
   },
+  noTimetableText: {
+    fontSize: 16,
+    color: '#F9FAFC',
+    textAlign: 'center',
+    fontFamily: 'PhantomSans-Bold',
+    margin: 10,
+    marginBottom: 20,
+  }
 });
 
 export default Home;

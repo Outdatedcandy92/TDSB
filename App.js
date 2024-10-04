@@ -12,6 +12,8 @@ import Timetable from './Timetable';
 import Calendar from './Calendar';
 import Announcements from './Announcements';
 import Settings from './Settings';
+import AnnouncementDetail from './AnnouncementDetail'; 
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -111,6 +113,7 @@ function App() {
       <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="HomeTabs" component={HomeTabs} />
+        <Stack.Screen name="AnnouncementDetail" component={AnnouncementDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

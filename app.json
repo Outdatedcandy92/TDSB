@@ -2,7 +2,7 @@
   "expo": {
     "name": "TDSB Connects Plus",
     "slug": "tdsbplus",
-    "version": "1.1.0-beta.1",
+    "version": "1.1.0-beta.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

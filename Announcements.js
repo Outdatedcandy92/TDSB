@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, StatusBar, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StatusBar, StyleSheet, Text, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Announcements = ({ navigation, activeDate }) => {
-  const [texts, setTexts] = useState([]);
+  const [htmlContent, setHtmlContent] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,11 +14,12 @@ const Announcements = ({ navigation, activeDate }) => {
           throw new Error('No access token found');
         }
 
+        console.log('Fetching Announcements');
         const url = `https://zappsmaprd.tdsb.on.ca/api/Announcement/D2L/GetNews/${schoolId}/filter/Published/skip/0/take/1/sort/0`;
 
         const response = await fetch(url, {
           headers: {
-            "X-Client-App-Info": "TDSBConnectsAPI||||0.0.0||2147483647|",
+            "X-Client-App-Info": "TDSBConnectAPI||||0.0.0||2147483647|",
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           }
@@ -27,13 +28,9 @@ const Announcements = ({ navigation, activeDate }) => {
         const data = await response.json();
         console.log(data);
 
-        // Extract texts from the response and clean them
-        const extractedTexts = data.map(item => {
-          let cleanedText = item.NewsItem.Body.Text.replace(/[\r]+/g, ' ');
-          cleanedText = cleanedText.split(' ').filter(word => word !== 'FROM' && word !== 'ANNOUNCEMENT').join(' '); // Remove unwanted words
-          return cleanedText;
-        });
-        setTexts(extractedTexts);
+        // Extract HTML content from the response
+        const extractedHtml = data.map(item => item.NewsItem.Body.Html);
+        setHtmlContent(extractedHtml);
 
       } catch (error) {
         console.error(error);
@@ -43,16 +40,44 @@ const Announcements = ({ navigation, activeDate }) => {
     fetchData();
   }, [activeDate]);
 
+  const renderHtmlContent = (html) => {
+    // Remove specific attributes and tags
+    const cleanedHtml = html
+      .replace(/valign="top" style="width: 440.15pt;border-top: none;border-left: none;border-bottom: solid windowtext 1.5pt;border-right: solid windowtext 1.5pt;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 98.25pt;border: solid windowtext 1.5pt;border-top: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 440.15pt;border: solid windowtext 1.5pt;border-left: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 98.25pt;border: solid windowtext 1.5pt;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/&#160;/g, '')
+      .replace(/&#39;/g, '');
+
+    // Manually parse the cleaned HTML content and create React Native components
+    const rows = cleanedHtml.split('<tr').slice(1).map(row => row.split('</tr>')[0]);
+    return rows.map((row, rowIndex) => {
+      const columns = row.split('<td').slice(1).map(col => col.split('</td>')[0]);
+      return (
+        <View key={rowIndex} style={styles.row}>
+          {columns.map((col, colIndex) => {
+            const content = col.replace(/<[^>]+>/g, '').replace(/\\/g, '').trim(); // Remove HTML tags and slashes
+            console.log(content);
+            return (
+              <View key={colIndex} style={[styles.cell, colIndex === 0 ? styles.firstCell : styles.secondCell]}>
+                <Text style={styles.text}>{content}</Text>
+              </View>
+            );
+          })}
+        </View>
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <Text style={styles.pageTitle}>Announcements</Text>
       <ScrollView contentContainerStyle={styles.content}>
-        {texts.map((text, index) => (
+        {htmlContent.map((html, index) => (
           <View key={index} style={styles.box}>
-            <Text style={styles.text}>
-              {text.replace(/FROM|ANNOUNCEMENT/g, '')}
-            </Text>
+            {renderHtmlContent(html)}
           </View>
         ))}
       </ScrollView>
@@ -78,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   content: {
-    width: '100%',
+    width: Dimensions.get('window').width, // Ensure full width
     alignItems: 'center',
   },
   box: {
@@ -86,13 +111,27 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 6,
     borderRadius: 5,
+    backgroundColor: '#282828', // Added background color for better visibility
+  },
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  cell: {
+    padding: 10,
+  },
+  firstCell: {
+    flex: 1, // Less space for the first column
+  },
+  secondCell: {
+    flex: 3, // More space for the second column
   },
   text: {
     fontSize: 15,
     fontFamily: 'PhantomSans-Regular',
     color: '#F9FAFC',
     textAlign: 'left',
-    flexWrap: 'wrap', // Ensure text wraps within the box
   },
 });
 

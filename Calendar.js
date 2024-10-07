@@ -28,10 +28,10 @@ const CalendarComponent = () => {
         const storedEvents = await AsyncStorage.getItem('events');
 
         //TODO: PROPER CHACHING
-        if (storedEvents) {  //null for now
+        if (storedEvents) { 
           const events = JSON.parse(storedEvents);
           setEvents(Array.isArray(events) ? events : []);
-          console.log('Fetched events from local storage:', events);
+          console.log('Fetched events from local storage:');
         } else {
           const token = await AsyncStorage.getItem('access_token');
           if (!token) {
@@ -39,7 +39,7 @@ const CalendarComponent = () => {
             return;
           }
 
-
+          console.log('Fetching events from API');
           // const TimeMindateString = "09/02/2024 00:00:00";
           // const TimeMaxdateString = "10/02/2024 00:00:00";
 

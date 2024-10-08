@@ -96,7 +96,7 @@ const Home = ({ navigation }) => {
             <Text style={styles.noTimetableText}>No timetable for today</Text>
           )}
         </View>
-        <Text style={styles.announcementTitle}>Today's Announcements</Text>
+        {/* <Text style={styles.announcementTitle}>Today's Announcements</Text>
         <View style={styles.grid}>
           <View style={styles.gridItem}>
             <Text style={styles.gridHeading}>From</Text>
@@ -115,8 +115,8 @@ const Home = ({ navigation }) => {
           </View>
           <View style={styles.gridItem}>
             <Text style={styles.gridText}>Homework due tomorrow</Text>
-          </View>
-        </View>
+          </View> 
+        </View>*/}
       </View>
     </View>
   );

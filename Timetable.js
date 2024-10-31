@@ -105,14 +105,20 @@ const Timetable = ({ navigation }) => {
 
   const incrementWeek = () => {
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() + 7);
+    newDate.setDate(newDate.getDate() + 7); // Move to the same day next week
+    const dayOfWeek = newDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+    const daysUntilNextMonday = (8 - dayOfWeek) % 7; // Days until next Monday
+    newDate.setDate(newDate.getDate() + daysUntilNextMonday);
     setCurrentDate(newDate);
     setActiveDate(newDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }));
   };
 
   const decrementWeek = () => {
     const newDate = new Date(currentDate);
-    newDate.setDate(currentDate.getDate() - 7);
+    newDate.setDate(newDate.getDate() - 7); // Move to the same day last week
+    const dayOfWeek = newDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+    const daysSinceLastMonday = (dayOfWeek + 6) % 7; // Days since last Monday
+    newDate.setDate(newDate.getDate() - daysSinceLastMonday);
     setCurrentDate(newDate);
     setActiveDate(newDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }));
   };

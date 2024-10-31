@@ -39,6 +39,12 @@ export default function SignIn({ navigation }) {
             if (data.access_token) {
                 await AsyncStorage.setItem('access_token', data.access_token);
 
+                await AsyncStorage.setItem('refresh_token', data.refresh_token);
+                await AsyncStorage.setItem('refresh_token_expiry', data['.expires']);
+
+                console.log("refresh_token: ", data.refresh_token);
+                console.log("refresh_token_expiry: ", data['.expires']);
+
                 // Fetch user data
                 const additionalUrl = 'https://zappsmaprd.tdsb.on.ca/api/Account/GetUserInfo';
                 const additionalResponse = await fetch(additionalUrl, {

@@ -93,8 +93,55 @@ function App() {
   React.useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      console.log('token successfully retrieved:');
-      setInitialRoute(token ? 'HomeTabs' : 'SignIn');
+      console.log('token successfully retrieved:', token);
+  
+      if (token) {
+        const refreshTokenExpiry = await AsyncStorage.getItem('refresh_token_expiry');
+        console.log('refresh_token_expiry:', refreshTokenExpiry);
+  
+        // Calculate days left before token expiry
+        const expiryDate = new Date(refreshTokenExpiry);
+        const currentDate = new Date();
+        const timeDifference = expiryDate - currentDate;
+        const daysLeft = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+  
+        console.log('Days left until refresh token expiry:', daysLeft);
+
+        if (daysLeft <= 2) {
+          const url = 'https://zappsmaprd.tdsb.on.ca/token';
+
+          const payload = new URLSearchParams({
+            refresh_token: data.refresh_token,
+            grant_type: 'refresh_token',
+          });
+
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Client-App-Info": "Android||2024Oct01120000P|False|1.2.6|False|306|",
+                "Accept": "application/json"
+              },
+              body: payload.toString(),
+            });
+            const data = await response.json();
+
+            console.log("data: ", data);
+            AsyncStorage.setItem('access_token', data.access_token);
+            AsyncStorage.setItem('refresh_token', data.refresh_token);
+            AsyncStorage.setItem('refresh_token_expiry', data['.expires']);
+          } catch (error) {
+            console.error("Error fetching token: ", error);
+          }
+        } else {
+
+        }
+  
+        setInitialRoute('HomeTabs');
+      } else {
+        setInitialRoute('SignIn');
+      }
     };
     checkToken();
   }, []);

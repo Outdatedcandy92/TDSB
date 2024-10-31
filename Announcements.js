@@ -30,15 +30,14 @@ const Announcements = ({ navigation, activeDate }) => {
         const data = await response.json();
         console.log(data);
 
-        // Directly access the first HTML content and title
         const extractedHtml = data[0].NewsItem.Body.Html;
         const extractedTitle = data[0].NewsItem.Title;
         setHtmlContent([extractedHtml]);
-        setTitle(extractedTitle); // Set the title
+        setTitle(extractedTitle); 
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false); 
       }
     };
 
@@ -51,6 +50,11 @@ const Announcements = ({ navigation, activeDate }) => {
       .replace(/valign="top" style="width: 98.25pt;border: solid windowtext 1.5pt;border-top: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
       .replace(/valign="top" style="width: 440.15pt;border: solid windowtext 1.5pt;border-left: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
       .replace(/valign="top" style="width: 98.25pt;border: solid windowtext 1.5pt;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 426.65pt;border-top: none;border-left: none;border-bottom: solid windowtext 1.5pt;border-right: solid windowtext 1.5pt;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 111.75pt;border: solid windowtext 1.5pt;border-top: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" rowspan="2" style="width: 111.75pt;border: solid windowtext 1.5pt;border-top: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 426.65pt;border: solid windowtext 1.5pt;border-left: none;padding: 0in 5.4pt 0in 5.4pt;">/g, '')
+      .replace(/valign="top" style="width: 111.75pt;border: solid windowtext 1.5pt;padding: 0in 5.4pt 0in 5.4pt;">/g, '')      
       .replace(/&#160;/g, '')
       .replace(/&#39;/g, '');
 
@@ -117,16 +121,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderColor: '#ccc',
-    paddingVertical: 10, // Ensure padding is applied
+    paddingVertical: 10, 
   },
   cell: {
-    paddingHorizontal: 10, // Ensure padding is applied
+    paddingHorizontal: 10, 
   },
   firstCell: {
-    flex: 1, // Less space for the first column
+    flex: 1, 
   },
   secondCell: {
-    flex: 3, // More space for the second column
+    flex: 3, 
   },
   text: {
     fontSize: 15,
@@ -135,7 +139,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   bottomPadding: {
-    height: 150, // Add padding at the bottom
+    height: 150, 
   },
 });
 

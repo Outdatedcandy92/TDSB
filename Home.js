@@ -75,6 +75,8 @@ const Home = ({ navigation }) => {
     fetchData();
   }, []);
 
+
+  // FIX: SHOW WEEKEND DAYS
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -96,7 +98,8 @@ const Home = ({ navigation }) => {
             <Text style={styles.noTimetableText}>No timetable for today</Text>
           )}
         </View>
-        <Text style={styles.announcementTitle}>Today's Announcements</Text>
+        {/* add something here later */}
+        {/* <Text style={styles.announcementTitle}>Today's Announcements</Text>
         <View style={styles.grid}>
           <View style={styles.gridItem}>
             <Text style={styles.gridHeading}>From</Text>
@@ -116,7 +119,7 @@ const Home = ({ navigation }) => {
           <View style={styles.gridItem}>
             <Text style={styles.gridText}>Homework due tomorrow</Text>
           </View>
-        </View>
+        </View> */}
       </View>
     </View>
   );

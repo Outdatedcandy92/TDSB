@@ -98,7 +98,6 @@ const Home = ({ navigation }) => {
             <Text style={styles.noTimetableText}>No timetable for today</Text>
           )}
         </View>
-        {/* add something here later */}
         {/* <Text style={styles.announcementTitle}>Today's Announcements</Text>
         <View style={styles.grid}>
           <View style={styles.gridItem}>

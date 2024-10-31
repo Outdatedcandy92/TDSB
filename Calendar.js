@@ -28,7 +28,7 @@ const CalendarComponent = () => {
         const storedEvents = await AsyncStorage.getItem('events');
 
         //TODO: PROPER CHACHING
-        if (storedEvents) { 
+        if (storedEvents===null) { 
           const events = JSON.parse(storedEvents);
           setEvents(Array.isArray(events) ? events : []);
           console.log('Fetched events from local storage:');
@@ -85,7 +85,7 @@ const CalendarComponent = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [currentDate]);
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -125,6 +125,14 @@ const CalendarComponent = () => {
 
   const handleDatePress = (date) => {
     setSelectedDate(date);
+  };
+
+  const handlePreviousMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
   const stripHtmlTags = (htmlString) => {
@@ -178,9 +186,17 @@ const CalendarComponent = () => {
       <StatusBar barStyle="light-content" />
       <Text style={styles.pageTitle}>Calendar</Text>
       <View style={styles.content}>
-        <Text style={styles.title}>
-          {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
-        </Text>
+        <View style={styles.monthNavigation}>
+          <TouchableOpacity onPress={handlePreviousMonth}>
+            <Text style={styles.arrow}>{"<"}</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>
+            {currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}
+          </Text>
+          <TouchableOpacity onPress={handleNextMonth}>
+            <Text style={styles.arrow}>{">"}</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.calendar}>
           {daysOfWeek.map((day, index) => (
             <View key={index} style={styles.dayOfWeekContainer}>
@@ -249,6 +265,16 @@ const styles = StyleSheet.create({
   content: {
     width: '100%',
     alignItems: 'center',
+  },
+  monthNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80%',
+  },
+  arrow: {
+    fontSize: 24,
+    color: '#F9FAFC',
   },
   title: {
     fontSize: 24,
